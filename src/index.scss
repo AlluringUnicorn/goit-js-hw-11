@@ -9,6 +9,11 @@ body {
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
 .form-container {
   display: flex;
   justify-content: center;
@@ -32,7 +37,7 @@ input {
   border: none;
 }
 
-button {
+.search-button {
   text-indent: -999px;
   overflow: hidden;
   width: 40px;
@@ -69,4 +74,21 @@ button {
 
 .info-item {
   margin: 0;
+}
+
+.button-div {
+  display: flex;
+  justify-content: center;
+}
+
+.load-button {
+  font-family: inherit;
+  border: none;
+  border-radius: 3px;
+  background-color: #6495ed;
+  color: white;
+  padding: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
