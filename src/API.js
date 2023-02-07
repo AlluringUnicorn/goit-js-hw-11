@@ -1,3 +1,5 @@
+import Notiflix from 'notiflix';
+
 const axios = require('axios').default;
 
 const BASE_URL = 'https://pixabay.com/api/';
@@ -19,6 +21,9 @@ export default class API {
       return response.data;
     } catch (error) {
       console.error(error);
+      Notiflix.Notify.failure(
+        'Ooops, we are sorry! Something went wrong, please try again later!'
+      );
     }
   }
 }
