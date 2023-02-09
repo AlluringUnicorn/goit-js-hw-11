@@ -3,14 +3,13 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import API from './API';
 
-const searchButton = document.querySelector('button');
-const inputEl = document.querySelector('input');
 const gallery = document.getElementById('gallery');
 const loadMore = document.getElementById('load-button');
+const form = document.getElementById('search-form');
 
 const api = new API();
 
-searchButton.addEventListener('click', onSearchClick);
+form.addEventListener('submit', onSubmit);
 loadMore.addEventListener('click', onLoadMore);
 
 const modal = new SimpleLightbox('.gallery a', {
@@ -18,53 +17,58 @@ const modal = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
 });
 
-function onLoadMore() {
-  api
-    .getImages()
-    .then(data => {
-      const images = data.hits;
-      const quantity = data.totalHits;
+async function onLoadMore() {
+  try {
+    const response = await api.getImages();
+    const images = response.data.hits;
 
-      if (images.length === 0) {
-        Notiflix.Notify.failure(
-          'We are sorry, but you have reached the end of search results'
-        );
-        loadMore.hidden = true;
-        return;
-      }
-
-      Notiflix.Notify.success(`Hooray! We found ${quantity} images.`);
-
-      const markup = images.reduce(
-        (markup, image) => createImageCard(image) + markup,
-        ''
+    if (images.length === 0) {
+      Notiflix.Notify.failure(
+        'We are sorry, but you have reached the end of search results'
       );
-      return markup;
-    })
-    .then(markup => {
-      gallery.insertAdjacentHTML('beforeend', markup);
-      modal.refresh();
-      scroll();
-    });
+      loadMore.hidden = true;
+      return;
+    }
+
+    const markup = images.reduce(
+      (markup, image) => createImageCard(image) + markup,
+      ''
+    );
+
+    gallery.insertAdjacentHTML('beforeend', markup);
+    modal.refresh();
+    scroll();
+  } catch (error) {
+    console.log(error);
+    Notiflix.Notify.failure(
+      'We are sorry, but you have reached the end of search results'
+    );
+    loadMore.hidden = true;
+  }
 }
 
-function onSearchClick(event) {
+async function onSubmit(event) {
   event.preventDefault();
   clearMarkup();
   loadMore.hidden = true;
 
   api.page = 1;
-  api.query = inputEl.value.trim();
+  api.query = form.elements.searchQuery.value.trim();
 
   if (api.query === '') {
     clearMarkup();
     return;
   }
+  try {
+    const response = await api.getImages();
+    const images = response.data.hits;
+    const quantity = response.data.totalHits;
 
-  api.getImages().then(data => {
-    const images = data.hits;
-    const quantity = data.totalHits;
     loadMore.hidden = false;
+
+    if (images.length < 40) {
+      loadMore.hidden = true;
+    }
 
     if (images.length === 0) {
       Notiflix.Notify.failure(
@@ -81,7 +85,9 @@ function onSearchClick(event) {
       ''
     );
     updateMarkup(markup);
-  });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function createImageCard({
